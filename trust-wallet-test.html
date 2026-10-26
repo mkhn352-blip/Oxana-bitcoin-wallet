@@ -1,1 +1,190 @@
-
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#09111f">
+<title>Oxana Bitcoin Wallet Pro</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#080e19;--card:#121d2f;--gold:#e9bd67;--text:#f4f1e8;--muted:#a2aec0;--line:#2b3a50;--green:#65d6a3;--red:#ff8989}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#192941,var(--bg) 65%);color:var(--text);font-family:Arial,sans-serif;line-height:1.6}
+header{text-align:center;padding:25px 15px;border-bottom:1px solid var(--line)}.logo{width:62px;height:62px;margin:auto;border:2px solid var(--gold);border-radius:20px;display:grid;place-items:center;color:var(--gold);font-size:36px;font-weight:bold}
+h1{font-size:25px;color:var(--gold);margin:9px 0 0}.sub{font-size:13px;color:var(--muted)}main{max-width:780px;margin:auto;padding:16px}
+.card{background:linear-gradient(145deg,#152238,#101827);border:1px solid var(--line);border-radius:17px;padding:17px;margin-bottom:15px;box-shadow:0 8px 25px #0002}
+h2{font-size:17px;color:var(--gold);margin:0 0 13px}label{display:block;color:var(--muted);font-size:13px;margin:10px 0 5px}
+input,select{width:100%;padding:12px;border-radius:10px;border:1px solid #35445b;background:#091321;color:#fff;font-size:15px}input:focus,select:focus{outline:1px solid var(--gold)}
+button{padding:11px 13px;border-radius:10px;border:1px solid var(--gold);background:var(--gold);color:#17130a;font-weight:bold;cursor:pointer;font-size:14px}button.secondary{background:#172338;color:var(--text);border-color:#394962}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row button{flex:1}.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.stat{background:#091321;border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+.stat small{display:block;color:var(--muted)}.stat strong{display:block;overflow-wrap:anywhere;font-size:18px;margin-top:4px}.msg{color:var(--muted);font-size:13px;overflow-wrap:anywhere;margin-top:9px}.good{color:var(--green)}.bad{color:var(--red)}
+#qr{display:flex;justify-content:center;align-items:center;margin:14px auto}#qr img,#qr canvas{max-width:100%;height:auto!important;border:8px solid white;border-radius:5px}
+#history{padding:0;list-style:none;margin:0}#history li{padding:12px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}#history li:last-child{border:0}
+.txid{font-size:12px;overflow-wrap:anywhere;word-break:break-word}.txdetails{line-height:1.8}.txamount{font-weight:bold;color:var(--gold)}a{color:var(--gold);text-decoration:none}
+.chartwrap{position:relative;height:230px;width:100%}footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+@media(max-width:390px){main{padding:10px}.card{padding:13px}.stat strong{font-size:16px}}
+</style>
+</head>
+<body>
+<header><div class="logo">₿</div><h1>Oxana Bitcoin Pro</h1><div class="sub" data-i="subtitle">نمایشگر عمومی بیت‌کوین</div></header>
+<main>
+<section class="card"><h2 data-i="language">زبان</h2><select id="language" aria-label="Language">
+<option value="en">1. English</option><option value="ru">2. Русский</option><option value="de">3. Deutsch</option><option value="fr">4. Français</option><option value="it">5. Italiano</option><option value="es">6. Español</option><option value="fa" selected>7. فارسی</option><option value="tr">8. Türkçe</option><option value="ar">9. العربية</option>
+</select></section>
+<section class="card"><h2 data-i="market">بازار و شبکه</h2><div class="stats">
+<div class="stat"><small data-i="price">قیمت بیت‌کوین</small><strong id="price">—</strong></div>
+<div class="stat"><small data-i="change">تغییر ۲۴ ساعته</small><strong id="change">—</strong></div>
+<div class="stat"><small data-i="block">ارتفاع آخرین بلاک</small><strong id="height">—</strong></div>
+<div class="stat"><small data-i="status">وضعیت اتصال</small><strong id="connection">—</strong></div>
+</div><h2 style="margin-top:20px" data-i="chart">نمودار قیمت ۷ روزه</h2><div class="chartwrap"><canvas id="priceChart"></canvas></div><div id="chartStatus" class="msg"></div><button class="secondary" id="refreshMarket" style="margin-top:12px" data-i="refresh">به‌روزرسانی بازار</button></section>
+<section class="card"><h2 data-i="receive">بررسی آدرس عمومی</h2><label for="address" data-i="address">آدرس عمومی بیت‌کوین</label><input id="address" dir="ltr" autocomplete="off" placeholder="Bitcoin public address">
+<div class="row" style="margin-top:10px"><button id="loadAddress" data-i="check">بررسی آدرس</button><button class="secondary" id="copy" data-i="copy">کپی</button><button class="secondary" id="share" data-i="share">اشتراک</button><button class="secondary" id="clear" data-i="clear">پاک کردن</button></div>
+<div id="qr"></div><div id="addressStatus" class="msg"></div><div class="stats">
+<div class="stat"><small data-i="confirmed">موجودی تأییدشده</small><strong id="confirmed">—</strong><small>BTC</small></div>
+<div class="stat"><small data-i="pending">تغییر موجودی تأییدنشده</small><strong id="pending">—</strong><small>BTC</small></div>
+</div></section>
+<section class="card"><h2 data-i="history">تاریخچه تراکنش‌ها</h2><div id="historyStatus" class="msg"></div><ul id="history"></ul></section>
+<section class="card"><h2 data-i="send">ارسال آزمایشی</h2><p class="msg" data-i="demo">این فرم فقط اطلاعات را بررسی می‌کند و بیت‌کوین ارسال نمی‌کند.</p>
+<label for="recipient" data-i="recipient">آدرس گیرنده</label><input id="recipient" dir="ltr" placeholder="Recipient address">
+<label for="amount" data-i="amount">مقدار BTC</label><input id="amount" type="number" min="0" step="any" inputmode="decimal" placeholder="0.001">
+<button id="prepare" style="margin-top:12px" data-i="prepare">بررسی اطلاعات</button><div id="sendStatus" class="msg"></div></section>
+<section class="card"><h2 data-i="security">امنیت</h2><p class="msg" data-i="securityText">این برنامه فقط اطلاعات عمومی بلاک‌چین را می‌خواند. کلید خصوصی یا عبارت بازیابی را وارد نکنید.</p></section>
+</main><footer>Oxana Bitcoin Pro · Read-only public viewer</footer>
+<script>
+'use strict';
+const API='https://blockstream.info/api', PRICE='https://api.coingecko.com/api/v3', KEY='oxana_mainnet_public_btc_address';
+const T={
+en:{subtitle:'Public Bitcoin viewer',language:'Language',market:'Market and network',price:'Bitcoin price',change:'24-hour change',block:'Latest block height',status:'Connection status',chart:'7-day price chart',refresh:'Refresh market',receive:'Check public address',address:'Public Bitcoin address',check:'Check address',copy:'Copy',share:'Share',clear:'Clear',confirmed:'Confirmed balance',pending:'Unconfirmed balance change',history:'Transaction history',send:'Demo send',demo:'This form only checks information. It does not send Bitcoin.',recipient:'Recipient address',amount:'Amount in BTC',prepare:'Validate information',security:'Security',securityText:'This app reads public blockchain data only. Never enter your private key or recovery phrase.',connected:'Connected',loading:'Loading…',checking:'Checking address…',badAddress:'Address format is not recognized.',addressError:'Could not load address data. Check connection and address.',noTx:'No transactions found.',noAddress:'Enter a public address first.',copied:'Address copied.',copyError:'Copy failed; copy manually.',cleared:'Address cleared.',shareError:'Sharing is unavailable on this device.',chartError:'Chart data unavailable.',sendInvalid:'Enter a plausible recipient address and an amount greater than zero.',demoResult:'Format check only. No transaction was created or sent.',marketError:'Market data unavailable. Try again later.',networkError:'Connection unavailable',date:'Date',txLink:'View transaction',qrError:'QR library unavailable.',chartUnavailable:'Chart library unavailable.',confirmedStatus:'Confirmed',unconfirmedStatus:'Unconfirmed',incoming:'Net received',outgoing:'Net sent',netZero:'Net change',fee:'Total transaction fee',blockHeight:'Block height'},
+ru:{subtitle:'Публичный просмотр Bitcoin',language:'Язык',market:'Рынок и сеть',price:'Цена Bitcoin',change:'Изменение за 24 часа',block:'Высота последнего блока',status:'Подключение',chart:'График цены за 7 дней',refresh:'Обновить рынок',receive:'Проверка публичного адреса',address:'Публичный адрес Bitcoin',check:'Проверить адрес',copy:'Копировать',share:'Поделиться',clear:'Очистить',confirmed:'Подтверждённый баланс',pending:'Неподтверждённое изменение',history:'История транзакций',send:'Демо-отправка',demo:'Форма только проверяет данные. Bitcoin не отправляется.',recipient:'Адрес получателя',amount:'Количество BTC',prepare:'Проверить данные',security:'Безопасность',securityText:'Приложение читает только публичные данные. Не вводите приватный ключ или seed-фразу.',connected:'Подключено',loading:'Загрузка…',checking:'Проверка адреса…',badAddress:'Формат адреса не распознан.',addressError:'Не удалось загрузить данные адреса.',noTx:'Транзакций нет.',noAddress:'Сначала введите публичный адрес.',copied:'Адрес скопирован.',copyError:'Не удалось скопировать.',cleared:'Адрес очищен.',shareError:'Общий доступ недоступен.',chartError:'Данные графика недоступны.',sendInvalid:'Введите адрес получателя и сумму больше нуля.',demoResult:'Проверен только формат. Транзакция не создана и не отправлена.',marketError:'Данные рынка недоступны.',networkError:'Нет подключения',date:'Дата',txLink:'Открыть транзакцию',qrError:'QR-библиотека недоступна.',chartUnavailable:'Библиотека графика недоступна.',confirmedStatus:'Подтверждена',unconfirmedStatus:'Не подтверждена',incoming:'Чистое поступление',outgoing:'Чистый расход',netZero:'Чистое изменение',fee:'Общая комиссия транзакции',blockHeight:'Высота блока'},
+de:{subtitle:'Öffentliche Bitcoin-Anzeige',language:'Sprache',market:'Markt und Netzwerk',price:'Bitcoin-Preis',change:'Änderung in 24 Stunden',block:'Letzte Blockhöhe',status:'Verbindungsstatus',chart:'7-Tage-Preischart',refresh:'Markt aktualisieren',receive:'Öffentliche Adresse prüfen',address:'Öffentliche Bitcoin-Adresse',check:'Adresse prüfen',copy:'Kopieren',share:'Teilen',clear:'Löschen',confirmed:'Bestätigtes Guthaben',pending:'Unbestätigte Änderung',history:'Transaktionsverlauf',send:'Demo-Senden',demo:'Dieses Formular prüft nur Angaben. Es sendet keine Bitcoin.',recipient:'Empfängeradresse',amount:'BTC-Betrag',prepare:'Angaben prüfen',security:'Sicherheit',securityText:'Diese App liest nur öffentliche Blockchain-Daten. Niemals privaten Schlüssel oder Wiederherstellungsphrase eingeben.',connected:'Verbunden',loading:'Laden…',checking:'Adresse wird geprüft…',badAddress:'Adressformat nicht erkannt.',addressError:'Adressdaten konnten nicht geladen werden.',noTx:'Keine Transaktionen gefunden.',noAddress:'Bitte zuerst eine öffentliche Adresse eingeben.',copied:'Adresse kopiert.',copyError:'Kopieren fehlgeschlagen.',cleared:'Adresse gelöscht.',shareError:'Teilen nicht verfügbar.',chartError:'Diagrammdaten nicht verfügbar.',sendInvalid:'Empfängeradresse und Betrag größer als null eingeben.',demoResult:'Nur das Format wurde geprüft. Keine Transaktion erstellt oder gesendet.',marketError:'Marktdaten nicht verfügbar.',networkError:'Keine Verbindung',date:'Datum',txLink:'Transaktion ansehen',qrError:'QR-Bibliothek nicht verfügbar.',chartUnavailable:'Diagrammbibliothek nicht verfügbar.',confirmedStatus:'Bestätigt',unconfirmedStatus:'Unbestätigt',incoming:'Nettoeingang',outgoing:'Nettoausgang',netZero:'Nettobewegung',fee:'Gesamte Transaktionsgebühr',blockHeight:'Blockhöhe'},
+fr:{subtitle:'Explorateur public Bitcoin',language:'Langue',market:'Marché et réseau',price:'Prix du Bitcoin',change:'Variation sur 24 heures',block:'Hauteur du dernier bloc',status:'État de connexion',chart:'Graphique sur 7 jours',refresh:'Actualiser le marché',receive:'Vérifier une adresse publique',address:'Adresse publique Bitcoin',check:'Vérifier',copy:'Copier',share:'Partager',clear:'Effacer',confirmed:'Solde confirmé',pending:'Variation non confirmée',history:'Historique des transactions',send:'Envoi de démonstration',demo:'Ce formulaire vérifie les données uniquement. Aucun Bitcoin envoyé.',recipient:'Adresse du destinataire',amount:'Montant en BTC',prepare:'Vérifier les données',security:'Sécurité',securityText:'Cette application lit uniquement les données publiques. Ne saisissez jamais votre clé privée ni votre phrase de récupération.',connected:'Connecté',loading:'Chargement…',checking:'Vérification de l’adresse…',badAddress:'Format d’adresse non reconnu.',addressError:'Impossible de charger les données de l’adresse.',noTx:'Aucune transaction trouvée.',noAddress:'Saisissez d’abord une adresse publique.',copied:'Adresse copiée.',copyError:'Échec de la copie.',cleared:'Adresse effacée.',shareError:'Partage indisponible.',chartError:'Données du graphique indisponibles.',sendInvalid:'Saisissez une adresse et un montant supérieur à zéro.',demoResult:'Format vérifié uniquement. Aucune transaction créée ou envoyée.',marketError:'Données de marché indisponibles.',networkError:'Connexion indisponible',date:'Date',txLink:'Voir la transaction',qrError:'Bibliothèque QR indisponible.',chartUnavailable:'Bibliothèque graphique indisponible.',confirmedStatus:'Confirmée',unconfirmedStatus:'Non confirmée',incoming:'Entrée nette',outgoing:'Sortie nette',netZero:'Variation nette',fee:'Frais totaux de transaction',blockHeight:'Hauteur du bloc'},
+it:{subtitle:'Visualizzatore pubblico Bitcoin',language:'Lingua',market:'Mercato e rete',price:'Prezzo Bitcoin',change:'Variazione 24 ore',block:'Altezza ultimo blocco',status:'Stato connessione',chart:'Grafico prezzi 7 giorni',refresh:'Aggiorna mercato',receive:'Controlla indirizzo pubblico',address:'Indirizzo pubblico Bitcoin',check:'Controlla',copy:'Copia',share:'Condividi',clear:'Cancella',confirmed:'Saldo confermato',pending:'Variazione non confermata',history:'Cronologia transazioni',send:'Invio demo',demo:'Il modulo controlla solo i dati. Non invia Bitcoin.',recipient:'Indirizzo destinatario',amount:'Importo BTC',prepare:'Verifica dati',security:'Sicurezza',securityText:'L’app legge solo dati pubblici. Non inserire mai chiave privata o frase di recupero.',connected:'Connesso',loading:'Caricamento…',checking:'Controllo indirizzo…',badAddress:'Formato indirizzo non riconosciuto.',addressError:'Impossibile caricare i dati dell’indirizzo.',noTx:'Nessuna transazione trovata.',noAddress:'Inserisci prima un indirizzo pubblico.',copied:'Indirizzo copiato.',copyError:'Copia non riuscita.',cleared:'Indirizzo cancellato.',shareError:'Condivisione non disponibile.',chartError:'Dati del grafico non disponibili.',sendInvalid:'Inserisci un indirizzo e un importo maggiore di zero.',demoResult:'Controllato solo il formato. Nessuna transazione creata o inviata.',marketError:'Dati di mercato non disponibili.',networkError:'Connessione non disponibile',date:'Data',txLink:'Visualizza transazione',qrError:'Libreria QR non disponibile.',chartUnavailable:'Libreria grafico non disponibile.',confirmedStatus:'Confermata',unconfirmedStatus:'Non confermata',incoming:'Entrata netta',outgoing:'Uscita netta',netZero:'Variazione netta',fee:'Commissione totale della transazione',blockHeight:'Altezza blocco'},
+es:{subtitle:'Visor público de Bitcoin',language:'Idioma',market:'Mercado y red',price:'Precio de Bitcoin',change:'Cambio en 24 horas',block:'Altura del último bloque',status:'Estado de conexión',chart:'Gráfico de precios de 7 días',refresh:'Actualizar mercado',receive:'Consultar dirección pública',address:'Dirección pública de Bitcoin',check:'Consultar',copy:'Copiar',share:'Compartir',clear:'Borrar',confirmed:'Saldo confirmado',pending:'Cambio sin confirmar',history:'Historial de transacciones',send:'Envío de demostración',demo:'Este formulario solo comprueba datos. No envía Bitcoin.',recipient:'Dirección del destinatario',amount:'Cantidad en BTC',prepare:'Validar datos',security:'Seguridad',securityText:'Esta aplicación solo lee datos públicos. Nunca introduzcas la clave privada ni la frase de recuperación.',connected:'Conectado',loading:'Cargando…',checking:'Consultando dirección…',badAddress:'Formato de dirección no reconocido.',addressError:'No se pudieron cargar los datos de la dirección.',noTx:'No se encontraron transacciones.',noAddress:'Introduce primero una dirección pública.',copied:'Dirección copiada.',copyError:'No se pudo copiar.',cleared:'Dirección borrada.',shareError:'Compartir no está disponible.',chartError:'Datos del gráfico no disponibles.',sendInvalid:'Introduce una dirección y una cantidad mayor que cero.',demoResult:'Solo se comprobó el formato. No se creó ni envió ninguna transacción.',marketError:'Datos de mercado no disponibles.',networkError:'Conexión no disponible',date:'Fecha',txLink:'Ver transacción',qrError:'Biblioteca QR no disponible.',chartUnavailable:'Biblioteca de gráficos no disponible.',confirmedStatus:'Confirmada',unconfirmedStatus:'Sin confirmar',incoming:'Entrada neta',outgoing:'Salida neta',netZero:'Cambio neto',fee:'Comisión total de la transacción',blockHeight:'Altura del bloque'},
+fa:{subtitle:'نمایشگر عمومی بیت‌کوین',language:'زبان',market:'بازار و شبکه',price:'قیمت بیت‌کوین',change:'تغییر ۲۴ ساعته',block:'ارتفاع آخرین بلاک',status:'وضعیت اتصال',chart:'نمودار قیمت ۷ روزه',refresh:'به‌روزرسانی بازار',receive:'بررسی آدرس عمومی',address:'آدرس عمومی بیت‌کوین',check:'بررسی آدرس',copy:'کپی',share:'اشتراک‌گذاری',clear:'پاک کردن',confirmed:'موجودی تأییدشده',pending:'تغییر موجودی تأییدنشده',history:'تاریخچه تراکنش‌ها',send:'ارسال آزمایشی',demo:'این فرم فقط اطلاعات را بررسی می‌کند و بیت‌کوین ارسال نمی‌کند.',recipient:'آدرس گیرنده',amount:'مقدار BTC',prepare:'بررسی اطلاعات',security:'امنیت',securityText:'این برنامه فقط اطلاعات عمومی بلاک‌چین را می‌خواند. کلید خصوصی یا عبارت بازیابی را وارد نکنید.',connected:'اتصال موفق',loading:'در حال بارگذاری…',checking:'در حال بررسی آدرس…',badAddress:'قالب آدرس شناخته نشد.',addressError:'اطلاعات آدرس بارگذاری نشد. اتصال اینترنت و آدرس را بررسی کن.',noTx:'تراکنشی پیدا نشد.',noAddress:'ابتدا آدرس عمومی را وارد کن.',copied:'آدرس کپی شد.',copyError:'کپی انجام نشد؛ آدرس را دستی کپی کن.',cleared:'آدرس پاک شد.',shareError:'اشتراک‌گذاری در این دستگاه در دسترس نیست.',chartError:'اطلاعات نمودار در دسترس نیست.',sendInvalid:'آدرس گیرنده و مقداری بیشتر از صفر وارد کن.',demoResult:'فقط قالب اطلاعات بررسی شد. هیچ تراکنشی ساخته یا ارسال نشد.',marketError:'اطلاعات بازار در دسترس نیست.',networkError:'اتصال برقرار نشد',date:'تاریخ',txLink:'مشاهده تراکنش',qrError:'کتابخانه QR در دسترس نیست.',chartUnavailable:'کتابخانه نمودار در دسترس نیست.',confirmedStatus:'تأییدشده',unconfirmedStatus:'در انتظار تأیید',incoming:'ورودی خالص',outgoing:'خروجی خالص',netZero:'تغییر خالص',fee:'کارمزد کل تراکنش',blockHeight:'ارتفاع بلاک'},
+tr:{subtitle:'Herkese açık Bitcoin görüntüleyici',language:'Dil',market:'Piyasa ve ağ',price:'Bitcoin fiyatı',change:'24 saatlik değişim',block:'Son blok yüksekliği',status:'Bağlantı durumu',chart:'7 günlük fiyat grafiği',refresh:'Piyasayı yenile',receive:'Genel adresi kontrol et',address:'Genel Bitcoin adresi',check:'Adresi kontrol et',copy:'Kopyala',share:'Paylaş',clear:'Temizle',confirmed:'Onaylanmış bakiye',pending:'Onaylanmamış bakiye değişimi',history:'İşlem geçmişi',send:'Deneme gönderimi',demo:'Bu form yalnızca bilgileri kontrol eder. Bitcoin göndermez.',recipient:'Alıcı adresi',amount:'BTC miktarı',prepare:'Bilgileri doğrula',security:'Güvenlik',securityText:'Bu uygulama yalnızca herkese açık blok zinciri verilerini okur. Özel anahtarınızı veya kurtarma ifadenizi girmeyin.',connected:'Bağlandı',loading:'Yükleniyor…',checking:'Adres kontrol ediliyor…',badAddress:'Adres biçimi tanınmadı.',addressError:'Adres verileri yüklenemedi.',noTx:'İşlem bulunamadı.',noAddress:'Önce genel adres girin.',copied:'Adres kopyalandı.',copyError:'Kopyalanamadı.',cleared:'Adres temizlendi.',shareError:'Paylaşım kullanılamıyor.',chartError:'Grafik verileri kullanılamıyor.',sendInvalid:'Alıcı adresi ve sıfırdan büyük miktar girin.',demoResult:'Yalnızca biçim kontrol edildi. İşlem oluşturulmadı veya gönderilmedi.',marketError:'Piyasa verileri kullanılamıyor.',networkError:'Bağlantı yok',date:'Tarih',txLink:'İşlemi görüntüle',qrError:'QR kitaplığı kullanılamıyor.',chartUnavailable:'Grafik kitaplığı kullanılamıyor.',confirmedStatus:'Onaylandı',unconfirmedStatus:'Onaylanmadı',incoming:'Net giriş',outgoing:'Net çıkış',netZero:'Net değişim',fee:'Toplam işlem ücreti',blockHeight:'Blok yüksekliği'},
+ar:{subtitle:'عارض بيتكوين العام',language:'اللغة',market:'السوق والشبكة',price:'سعر بيتكوين',change:'التغير خلال 24 ساعة',block:'ارتفاع أحدث كتلة',status:'حالة الاتصال',chart:'مخطط السعر خلال 7 أيام',refresh:'تحديث السوق',receive:'فحص العنوان العام',address:'عنوان بيتكوين العام',check:'فحص العنوان',copy:'نسخ',share:'مشاركة',clear:'مسح',confirmed:'الرصيد المؤكد',pending:'تغير الرصيد غير المؤكد',history:'سجل المعاملات',send:'إرسال تجريبي',demo:'هذا النموذج يفحص المعلومات فقط ولا يرسل بيتكوين.',recipient:'عنوان المستلم',amount:'المبلغ ببيتكوين',prepare:'التحقق من المعلومات',security:'الأمان',securityText:'يقرأ التطبيق بيانات البلوكشين العامة فقط. لا تدخل المفتاح الخاص أو عبارة الاسترداد.',connected:'متصل',loading:'جارٍ التحميل…',checking:'جارٍ فحص العنوان…',badAddress:'تنسيق العنوان غير معروف.',addressError:'تعذر تحميل بيانات العنوان. تحقق من الاتصال والعنوان.',noTx:'لم يتم العثور على معاملات.',noAddress:'أدخل عنوانًا عامًا أولًا.',copied:'تم نسخ العنوان.',copyError:'تعذر النسخ. انسخ العنوان يدويًا.',cleared:'تم مسح العنوان.',shareError:'المشاركة غير متاحة على هذا الجهاز.',chartError:'بيانات المخطط غير متاحة.',sendInvalid:'أدخل عنوان مستلم ومبلغًا أكبر من صفر.',demoResult:'تم فحص التنسيق فقط. لم يتم إنشاء معاملة أو إرسالها.',marketError:'بيانات السوق غير متاحة.',networkError:'الاتصال غير متاح',date:'التاريخ',txLink:'عرض المعاملة',qrError:'مكتبة QR غير متاحة.',chartUnavailable:'مكتبة المخطط غير متاحة.',confirmedStatus:'مؤكدة',unconfirmedStatus:'غير مؤكدة',incoming:'صافي الوارد',outgoing:'صافي الصادر',netZero:'صافي التغيير',fee:'إجمالي رسوم المعاملة',blockHeight:'ارتفاع الكتلة'}
+};
+let lang='fa',chart=null,chartLabels=[],chartValues=[];
+const $=id=>document.getElementById(id), t=k=>(T[lang]&&T[lang][k])||T.en[k]||k;
+function msg(id,text,kind=''){$(id).textContent=text;$(id).className='msg '+kind;}
+function applyLanguage(){
+  lang=$('language').value;
+  document.documentElement.lang=lang;
+  document.documentElement.dir=['fa','ar'].includes(lang)?'rtl':'ltr';
+  document.querySelectorAll('[data-i]').forEach(el=>{el.textContent=t(el.dataset.i);});
+  if(chart){chart.data.labels=chartLabels;chart.data.datasets[0].label=t('price')+' (USD)';chart.update();}
+}
+$('language').addEventListener('change',applyLanguage);
+function validAddress(a){return /^(bc1[ac-hj-np-z02-9]{11,71}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/.test(a.trim());}
+async function getJSON(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);return r.json();}
+function fmt(n){return new Intl.NumberFormat(lang==='fa'?'fa-IR':lang==='ar'?'ar':lang==='ru'?'ru-RU':lang==='de'?'de-DE':lang==='fr'?'fr-FR':lang==='it'?'it-IT':lang==='es'?'es-ES':lang==='tr'?'tr-TR':'en-US',{maximumFractionDigits:2}).format(n);}
+function fmtBTC(sats){return (Number(sats||0)/1e8).toFixed(8)+' BTC';}
+function drawChart(){
+  if(typeof Chart==='undefined'){msg('chartStatus',t('chartUnavailable'),'bad');return;}
+  if(chart)chart.destroy();
+  chart=new Chart($('priceChart').getContext('2d'),{type:'line',data:{labels:chartLabels,datasets:[{label:t('price')+' (USD)',data:chartValues,borderColor:'#e9bd67',backgroundColor:'rgba(233,189,103,.12)',fill:true,tension:.3,pointRadius:2,borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#f4f1e8'}}},scales:{x:{ticks:{color:'#a2aec0',maxTicksLimit:7},grid:{color:'#29364a'}},y:{ticks:{color:'#a2aec0',callback:v=>'$'+Number(v).toLocaleString()},grid:{color:'#29364a'}}}}});
+}
+async function loadMarket(){
+  $('connection').textContent=t('loading');
+  try{
+    const [p,h,c]=await Promise.all([
+      getJSON(PRICE+'/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true'),
+      getJSON(API+'/blocks/tip/height'),
+      getJSON(PRICE+'/coins/bitcoin/market_chart?vs_currency=usd&days=7&interval=daily')
+    ]);
+    $('price').textContent='$'+fmt(p.bitcoin.usd);
+    const change=Number(p.bitcoin.usd_24h_change);
+    $('change').textContent=(change>=0?'+':'')+fmt(change)+'%';
+    $('change').className=change>=0?'good':'bad';
+    $('height').textContent=fmt(Number(h));
+    $('connection').textContent=t('connected');$('connection').className='good';
+    chartLabels=(c.prices||[]).map(x=>new Date(x[0]).toLocaleDateString(lang==='fa'?'fa-IR':lang==='ar'?'ar':lang,{month:'short',day:'numeric'}));
+    chartValues=(c.prices||[]).map(x=>x[1]);
+    drawChart();msg('chartStatus','');
+  }catch(e){$('connection').textContent=t('networkError');$('connection').className='bad';msg('chartStatus',t('marketError'),'bad');}
+}
+$('refreshMarket').addEventListener('click',loadMarket);
+function makeQR(a){
+  $('qr').replaceChildren();if(!a)return;
+  if(typeof QRCode==='undefined'){msg('addressStatus',t('qrError'),'bad');return;}
+  new QRCode($('qr'),{text:a,width:180,height:180,colorDark:'#091321',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+}
+function addTx(tx,address){
+  const li=document.createElement('li');
+  const title=document.createElement('div');
+  const details=document.createElement('div');
+  const link=document.createElement('a');
+  const id=tx.txid||'';
+  const confirmed=!!(tx.status&&tx.status.confirmed);
+  const received=(tx.vout||[]).filter(o=>o.scriptpubkey_address===address)
+    .reduce((sum,o)=>sum+Number(o.value||0),0);
+  const spent=(tx.vin||[]).filter(i=>i.prevout&&i.prevout.scriptpubkey_address===address)
+    .reduce((sum,i)=>sum+Number(i.prevout.value||0),0);
+  const net=received-spent;
+  title.className='txid';
+  title.textContent=(confirmed?'✓ ':'… ')+id;
+  details.className='msg txdetails';
+  const date=tx.status&&tx.status.block_time
+    ?new Date(tx.status.block_time*1000).toLocaleString(lang==='fa'?'fa-IR':lang==='ar'?'ar':lang)
+    : '—';
+  let movementLabel=t('netZero'),movementValue=net;
+  if(net>0)movementLabel=t('incoming');
+  else if(net<0)movementLabel=t('outgoing');
+  const lines=[
+    t('confirmedStatus')+': '+(confirmed?t('confirmedStatus'):t('unconfirmedStatus')),
+    t('date')+': '+date,
+    movementLabel+': '+(net>0?'+':net<0?'−':'')+fmtBTC(Math.abs(movementValue)),
+    t('fee')+': '+fmtBTC(tx.fee||0)
+  ];
+  if(confirmed&&tx.status.block_height)lines.push(t('blockHeight')+': '+tx.status.block_height);
+  details.textContent=lines.join(' | ');
+  link.href='https://blockstream.info/tx/'+encodeURIComponent(id);
+  link.target='_blank';link.rel='noopener noreferrer';link.textContent=t('txLink');
+  li.append(title,details,link);$('history').appendChild(li);
+}
+async function loadAddress(){
+  const a=$('address').value.trim();
+  if(!a){msg('addressStatus',t('noAddress'),'bad');return;}
+  if(!validAddress(a)){msg('addressStatus',t('badAddress'),'bad');return;}
+  msg('addressStatus',t('checking'));$('history').replaceChildren();msg('historyStatus',t('loading'));
+  $('confirmed').textContent='—';$('pending').textContent='—';makeQR(a);
+  try{
+    const e=encodeURIComponent(a);
+    const [info,txs]=await Promise.all([getJSON(API+'/address/'+e),getJSON(API+'/address/'+e+'/txs')]);
+    const c=info.chain_stats||{},m=info.mempool_stats||{};
+    $('confirmed').textContent=(((c.funded_txo_sum||0)-(c.spent_txo_sum||0))/1e8).toFixed(8);
+    $('pending').textContent=(((m.funded_txo_sum||0)-(m.spent_txo_sum||0))/1e8).toFixed(8);
+    if(!txs.length){msg('historyStatus',t('noTx'));}
+    else{msg('historyStatus','');txs.slice(0,20).forEach(tx=>addTx(tx,a));}
+    msg('addressStatus',t('connected'),'good');
+    try{localStorage.setItem(KEY,a);}catch(_){}
+  }catch(e){msg('addressStatus',t('addressError'),'bad');msg('historyStatus',t('addressError'),'bad');}
+}
+$('loadAddress').addEventListener('click',loadAddress);
+$('address').addEventListener('keydown',e=>{if(e.key==='Enter')loadAddress();});
+$('copy').addEventListener('click',async()=>{
+  const a=$('address').value.trim();if(!a){msg('addressStatus',t('noAddress'),'bad');return;}
+  try{await navigator.clipboard.writeText(a);msg('addressStatus',t('copied'),'good');}
+  catch(e){msg('addressStatus',t('copyError'),'bad');}
+});
+$('share').addEventListener('click',async()=>{
+  const a=$('address').value.trim();if(!a){msg('addressStatus',t('noAddress'),'bad');return;}
+  try{if(!navigator.share)throw Error('unavailable');await navigator.share({title:'Oxana Bitcoin',text:a});}
+  catch(e){if(e.name!=='AbortError')msg('addressStatus',t('shareError'),'bad');}
+});
+$('clear').addEventListener('click',()=>{
+  $('address').value='';$('qr').replaceChildren();$('history').replaceChildren();
+  $('confirmed').textContent='—';$('pending').textContent='—';
+  msg('addressStatus',t('cleared'));msg('historyStatus','');
+  try{localStorage.removeItem(KEY);}catch(_){}
+});
+$('prepare').addEventListener('click',()=>{
+  const a=$('recipient').value.trim(),n=Number($('amount').value);
+  if(!validAddress(a)||!Number.isFinite(n)||n<=0){msg('sendStatus',t('sendInvalid'),'bad');return;}
+  msg('sendStatus',t('demoResult'),'good');
+});
+try{const saved=localStorage.getItem(KEY);if(saved)$('address').value=saved;}catch(_){}
+applyLanguage();loadMarket();
+</script>
+</body>
+</html>
