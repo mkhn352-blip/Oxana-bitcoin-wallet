@@ -1,1 +1,86 @@
 
+
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oxana Bitcoin - Trust Wallet Test</title>
+<style>
+body{margin:0;background:#080e19;color:#f4f1e8;font-family:Arial,sans-serif;text-align:center;padding:24px}
+.card{max-width:480px;margin:30px auto;background:#121d2f;border:1px solid #394962;border-radius:18px;padding:24px}
+h1{color:#e9bd67}
+p{line-height:1.8;color:#c3cede}
+button{width:100%;padding:14px;margin:8px 0;border:0;border-radius:10px;background:#e9bd67;color:#17130a;font-size:16px;font-weight:bold;cursor:pointer}
+.secondary{background:#24344b;color:white}
+#status{overflow-wrap:anywhere;font-size:14px}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>₿ Oxana Bitcoin Pro</h1>
+<p>آزمایش اتصال کیف پول بیت‌کوین</p>
+<button id="connect">اتصال کیف پول</button>
+<button class="secondary" id="disconnect">قطع اتصال</button>
+<p id="status">آماده اتصال</p>
+<p id="address" dir="ltr"></p>
+</div>
+
+<script type="module">
+import { createAppKit } from 'https://esm.sh/@reown/appkit@1.8.21';
+import { BitcoinAdapter } from 'https://esm.sh/@reown/appkit-adapter-bitcoin@1.8.21';
+import { bitcoin 
+const PROJECT_ID = 'fd9f6af01ff8f8736f24318c0f8fa1e2';
+const status = document.getElementById('status');
+const address = document.getElementById('address');
+
+if (PROJECT_ID === 'شناسه-پروژه-Reown-را-اینجا-قرار-بده') {
+  status.textContent = 'ابتدا شناسه پروژه Reown را وارد کنید.';
+} else {
+  try {
+    const appKit = createAppKit({
+      adapters: [new BitcoinAdapter()],
+      networks: [bitcoin],
+      projectId: PROJECT_ID,
+      metadata: {
+        name: 'Oxana Bitcoin Pro',
+        description: 'Bitcoin wallet connection test',
+        url: 'https://mkhn352-blip.github.io',
+        icons: []
+      },
+      features: { analytics: false }
+    });
+
+    document.getElementById('connect').addEventListener('click', async () => {
+      try {
+        status.textContent = 'در حال باز کردن پنجره اتصال...';
+        await appKit.open({ view: 'Connect', namespace: 'bip122' });
+        status.textContent = 'پنجره اتصال باز شد؛ کیف پول را انتخاب کنید.';
+      } catch (error) {
+        status.textContent = 'خطای اتصال: ' + error.message;
+      }
+    });
+
+    document.getElementById('disconnect').addEventListener('click', async () => {
+      try {
+        await appKit.disconnect('bip122');
+        address.textContent = '';
+        status.textContent = 'اتصال قطع شد.';
+      } catch (error) {
+        status.textContent = 'قطع اتصال انجام نشد: ' + error.message;
+      }
+    });
+
+    appKit.subscribeAccount(state => {
+      if (state?.address) {
+        address.textContent = state.address;
+        status.textContent = 'آدرس کیف پول متصل شد.';
+      }
+    }, 'bip122');
+  } catch (error) {
+    status.textContent = 'خطای راه‌اندازی: ' + error.message;
+  }
+}
+</script>
+</body>
+</html>
