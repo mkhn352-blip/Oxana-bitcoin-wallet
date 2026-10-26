@@ -1,44 +1,115 @@
 
-
 <!doctype html>
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Oxana Bitcoin - Trust Wallet Test</title>
+<title>Oxana Bitcoin Pro - Wallet Test</title>
 <style>
-body{margin:0;background:#080e19;color:#f4f1e8;font-family:Arial,sans-serif;text-align:center;padding:24px}
-.card{max-width:480px;margin:30px auto;background:#121d2f;border:1px solid #394962;border-radius:18px;padding:24px}
-h1{color:#e9bd67}
-p{line-height:1.8;color:#c3cede}
-button{width:100%;padding:14px;margin:8px 0;border:0;border-radius:10px;background:#e9bd67;color:#17130a;font-size:16px;font-weight:bold;cursor:pointer}
-.secondary{background:#24344b;color:white}
-#status{overflow-wrap:anywhere;font-size:14px}
+body {
+  margin: 0;
+  padding: 24px;
+  background: #080e19;
+  color: #f4f1e8;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+.card {
+  max-width: 480px;
+  margin: 30px auto;
+  padding: 24px;
+  background: #121d2f;
+  border: 1px solid #394962;
+  border-radius: 18px;
+}
+h1 { color: #e9bd67; }
+p { line-height: 1.8; color: #c3cede; }
+button {
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0;
+  border: 0;
+  border-radius: 10px;
+  background: #e9bd67;
+  color: #17130a;
+  font-size: 16px;
+  font-weight: bold;
+}
+.secondary {
+  background: #24344b;
+  color: white;
+}
+#status, #address {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
 </style>
 </head>
 <body>
 <div class="card">
-<h1>₿ Oxana Bitcoin Pro</h1>
-<p>آزمایش اتصال کیف پول بیت‌کوین</p>
-<button id="connect">اتصال کیف پول</button>
-<button class="secondary" id="disconnect">قطع اتصال</button>
-<p id="status">آماده اتصال</p>
-<p id="address" dir="ltr"></p>
+  <h1>₿ Oxana Bitcoin Pro</h1>
+  <p>آزمایش اتصال کیف پول بیت‌کوین</p>
+  <button id="connect">اتصال کیف پول</button>
+  <button id="disconnect" class="secondary">قطع اتصال</button>
+  <p id="status">در حال بارگذاری ابزار اتصال...</p>
+  <p id="address" dir="ltr"></p>
 </div>
 
 <script type="module">
-import { createAppKit } from 'https://esm.sh/@reown/appkit@1.8.21';
-import { BitcoinAdapter } from 'https://esm.sh/@reown/appkit-adapter-bitcoin@1.8.21';
-import { bitcoin 
 const PROJECT_ID = 'fd9f6af01ff8f8736f24318c0f8fa1e2';
-const status = document.getElementById('status');
-const address = document.getElementById('address');
 
-if (PROJECT_ID === 'شناسه-پروژه-Reown-را-اینجا-قرار-بده') {
-  status.textContent = 'ابتدا شناسه پروژه Reown را وارد کنید.';
-} else {
+const statusEl = document.getElementById('status');
+const addressEl = document.getElementById('address');
+const connectBtn = document.getElementById('connect');
+const disconnectBtn = document.getElementById('disconnect');
+
+let appKit = null;
+
+connectBtn.addEventListener('click', async () => {
+  if (!appKit) {
+    statusEl.textContent =
+      'ابزار اتصال هنوز بارگذاری نشده است. صفحه را تازه‌سازی کنید و اینترنت را بررسی کنید.';
+    return;
+  }
+
   try {
-    const appKit = createAppKit({
+    statusEl.textContent = 'در حال باز کردن پنجره کیف پول...';
+    await appKit.open({ view: 'Connect', namespace: 'bip122' });
+    statusEl.textContent =
+      'پنجره اتصال باز شد. کیف پول بیت‌کوین را انتخاب کنید.';
+  } catch (error) {
+    statusEl.textContent = 'خطای اتصال: ' + (error?.message || error);
+  }
+});
+
+disconnectBtn.addEventListener('click', async () => {
+  if (!appKit) {
+    statusEl.textContent = 'ابزار اتصال بارگذاری نشده است.';
+    return;
+  }
+
+  try {
+    await appKit.disconnect({ namespace: 'bip122' });
+    addressEl.textContent = '';
+    statusEl.textContent = 'درخواست قطع اتصال انجام شد.';
+  } catch (error) {
+    statusEl.textContent =
+      'خطای قطع اتصال: ' + (error?.message || error);
+  }
+});
+
+async function startApp() {
+  try {
+    const { createAppKit } =
+      await import('https://esm.sh/@reown/appkit@1.8.21');
+
+    const { BitcoinAdapter } =
+      await import('https://esm.sh/@reown/appkit-adapter-bitcoin@1.8.21');
+
+    const { bitcoin } =
+      await import('https://esm.sh/@reown/appkit/networks');
+
+    appKit = createAppKit({
       adapters: [new BitcoinAdapter()],
       networks: [bitcoin],
       projectId: PROJECT_ID,
@@ -48,39 +119,36 @@ if (PROJECT_ID === 'شناسه-پروژه-Reown-را-اینجا-قرار-بده'
         url: 'https://mkhn352-blip.github.io',
         icons: []
       },
-      features: { analytics: false }
-    });
-
-    document.getElementById('connect').addEventListener('click', async () => {
-      try {
-        status.textContent = 'در حال باز کردن پنجره اتصال...';
-        await appKit.open({ view: 'Connect', namespace: 'bip122' });
-        status.textContent = 'پنجره اتصال باز شد؛ کیف پول را انتخاب کنید.';
-      } catch (error) {
-        status.textContent = 'خطای اتصال: ' + error.message;
+      features: {
+        analytics: false,
+        email: false,
+        socials: false,
+        onramp: false,
+        swaps: false
       }
     });
 
-    document.getElementById('disconnect').addEventListener('click', async () => {
-      try {
-        await appKit.disconnect('bip122');
-        address.textContent = '';
-        status.textContent = 'اتصال قطع شد.';
-      } catch (error) {
-        status.textContent = 'قطع اتصال انجام نشد: ' + error.message;
-      }
-    });
+    statusEl.textContent =
+      'ابزار اتصال بارگذاری شد. برای شروع روی اتصال کیف پول بزنید.';
 
-    appKit.subscribeAccount(state => {
-      if (state?.address) {
-        address.textContent = state.address;
-        status.textContent = 'آدرس کیف پول متصل شد.';
-      }
-    }, 'bip122');
+    if (typeof appKit.subscribeAccount === 'function') {
+      appKit.subscribeAccount((state) => {
+        const account = state?.address || state?.caipAddress || '';
+        if (account) {
+          addressEl.textContent = account;
+          statusEl.textContent = 'اطلاعات حساب کیف پول دریافت شد.';
+        }
+      }, 'bip122');
+    }
   } catch (error) {
-    status.textContent = 'خطای راه‌اندازی: ' + error.message;
+    appKit = null;
+    statusEl.textContent =
+      'خطای بارگذاری: ' + (error?.message || error) +
+      ' — اتصال اینترنت و بارگذاری کتابخانه را بررسی کنید.';
   }
 }
+
+startApp();
 </script>
 </body>
 </html>
